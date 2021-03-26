@@ -12,6 +12,34 @@ jobs:
       CUSTOMIZED_SDK_URL: 'https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u-2021-02-16-06-25/OpenJDK8U-jdk_x64_linux_hotspot_2021-02-16-06-25.tar.gz'
       SDK_RESOURCE: 'nightly'
     steps:
+    # get-pr step by @Simran-B https://github.com/actions/checkout/issues/331#issuecomment-707103442
+    - uses: actions/github-script@v3
+      id: get-pr
+      with:
+        script: |
+          const request = {
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.issue.number
+          }
+          core.info(`Getting PR #${request.pull_number} from ${request.owner}/${request.repo}`)
+          try {
+            const result = await github.pulls.get(request)
+            return result.data
+          } catch (err) {
+            core.setFailed(`Request failed with error ${err}`)
+          }
+    - name: Extract base and head
+      id: base-head
+      run: |
+        echo ::set-output name=head_repo_url::${{ fromJSON(steps.get-pr.outputs.result).head.repo.html_url }}
+        echo ::set-output name=head_branch::${{ fromJSON(steps.get-pr.outputs.result).head.ref }}
+    - uses: actions/checkout@v2 # we checkout the master branch because the jcov results.xml is based on the master branch.
+    - name: get diff file
+      run: |
+        git remote add upstream ${{ steps.base-head.outputs.head_repo_url }}
+        git fetch upstream
+        git diff --patch master upstream/${{ fromJSON(steps.get-pr.outputs.result).head.ref }} > diff
     - name: download jtreg
       run: |
         ls
@@ -41,35 +69,7 @@ jobs:
       run: |
         wget https://ci.adoptopenjdk.net/job/UploadFile/25/artifact/upload/result.xml
         pwd
-        ls
-    # get-pr step by @Simran-B https://github.com/actions/checkout/issues/331#issuecomment-707103442
-    - uses: actions/github-script@v3
-      id: get-pr
-      with:
-        script: |
-          const request = {
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            pull_number: context.issue.number
-          }
-          core.info(`Getting PR #${request.pull_number} from ${request.owner}/${request.repo}`)
-          try {
-            const result = await github.pulls.get(request)
-            return result.data
-          } catch (err) {
-            core.setFailed(`Request failed with error ${err}`)
-          }
-    - name: Extract base and head
-      id: base-head
-      run: |
-        echo ::set-output name=head_repo_url::${{ fromJSON(steps.get-pr.outputs.result).head.repo.html_url }}
-        echo ::set-output name=head_branch::${{ fromJSON(steps.get-pr.outputs.result).head.ref }}
-    - uses: actions/checkout@v2 # we checkout the master branch because the jcov results.xml is based on the master branch.
-    - name: get diff file
-      run: |
-        git remote add upstream ${{ steps.base-head.outputs.head_repo_url }}
-        git fetch upstream
-        git diff --patch master upstream/${{ fromJSON(steps.get-pr.outputs.result).head.ref }} > diff
+        ls    
     - name: run jcov
       run: |
         ls
