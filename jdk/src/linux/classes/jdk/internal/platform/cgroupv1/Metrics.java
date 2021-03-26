@@ -233,7 +233,9 @@ public class Metrics implements jdk.internal.platform.Metrics {
             metric.setActiveSubSystems();
         }
     }
-
+    private static void test() {
+        System.out.println(123);
+    }
 
     private static boolean getHierarchical(MemorySubSystem subsystem) {
         long hierarchical = SubSystem.getLongValue(subsystem, "memory.use_hierarchy");

@@ -63,9 +63,6 @@ public class AddTests {
         return failures;
     }
 
-    private void tet() {
-        
-    }
     /**
      * Test for extreme value of scale and rounding precision that
      * could cause integer overflow in right-shift-into-sticky-bit
