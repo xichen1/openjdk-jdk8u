@@ -14,11 +14,15 @@ jobs:
     steps:
     - name: download jtreg
       run: |
+        ls
+        pwd
         wget https://ci.adoptopenjdk.net/job/jtreg/lastSuccessfulBuild/artifact/jtreg-4.2.0-tip.tar.gz
         tar -zxvf jtreg-4.2.0-tip.tar.gz
         rm -rf jtreg-4.2.0-tip.tar.gz
     - name: download jdk
       run: |
+        ls
+        pwd
         mkdir -p 'jdkbinary' && cd 'jdkbinary' && rm -rf *
         if [ "$SDK_RESOURCE" == "customized" ]; then
           wget ${CUSTOMIZED_SDK_URL}
@@ -34,7 +38,10 @@ jobs:
         rm -rf $jdkFileName
         cd $GITHUB_WORKSPACE
     - name: download results.xml
-      run: wget https://ci.adoptopenjdk.net/job/UploadFile/25/artifact/upload/result.xml
+      run: |
+        wget https://ci.adoptopenjdk.net/job/UploadFile/25/artifact/upload/result.xml
+        pwd
+        ls
     # get-pr step by @Simran-B https://github.com/actions/checkout/issues/331#issuecomment-707103442
     - uses: actions/github-script@v3
       id: get-pr
