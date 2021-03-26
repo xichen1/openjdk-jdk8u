@@ -39,7 +39,7 @@ jobs:
       run: |
         git remote add upstream ${{ steps.base-head.outputs.head_repo_url }}
         git fetch upstream
-        git diff --patch master upstream/${{ fromJSON(steps.get-pr.outputs.result).head.ref }} > diff
+        git diff --patch upstream/${{ fromJSON(steps.get-pr.outputs.result).head.ref }} master > diff
     - name: download jtreg
       run: |
         wget https://ci.adoptopenjdk.net/job/jtreg/lastSuccessfulBuild/artifact/jtreg-4.2.0-tip.tar.gz
