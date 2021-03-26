@@ -63,6 +63,10 @@ public class AddTests {
         return failures;
     }
 
+    private static void test() {
+        
+    }
+
     /**
      * Test for extreme value of scale and rounding precision that
      * could cause integer overflow in right-shift-into-sticky-bit
