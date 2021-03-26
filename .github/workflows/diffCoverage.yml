@@ -42,15 +42,11 @@ jobs:
         git diff --patch master upstream/${{ fromJSON(steps.get-pr.outputs.result).head.ref }} > diff
     - name: download jtreg
       run: |
-        ls
-        pwd
         wget https://ci.adoptopenjdk.net/job/jtreg/lastSuccessfulBuild/artifact/jtreg-4.2.0-tip.tar.gz
         tar -zxvf jtreg-4.2.0-tip.tar.gz
         rm -rf jtreg-4.2.0-tip.tar.gz
     - name: download jdk
       run: |
-        ls
-        pwd
         mkdir -p 'jdkbinary' && cd 'jdkbinary' && rm -rf *
         if [ "$SDK_RESOURCE" == "customized" ]; then
           wget ${CUSTOMIZED_SDK_URL}
@@ -67,13 +63,9 @@ jobs:
         cd $GITHUB_WORKSPACE
     - name: download results.xml
       run: |
-        wget https://ci.adoptopenjdk.net/job/UploadFile/25/artifact/upload/result.xml
-        pwd
-        ls    
+        wget https://ci.adoptopenjdk.net/job/UploadFile/25/artifact/upload/result.xml   
     - name: run jcov
       run: |
-        ls
-        pwd
         java -jar jtreg/lib/jcov.jar diffcoverage result.xml diff -all
     - name: echo diff
       run: |
