@@ -65,7 +65,9 @@ jobs:
         git diff --patch master upstream/${{ fromJSON(steps.get-pr.outputs.result).head.ref }} > diff
     - name: run jcov
       run: |
-        java -jar ${GITHUB_WORKSPACE}/jtreg/lib/jcov.jar diffcoverage result.xml diff -all
+        ls
+        pwd
+        java -jar jtreg/lib/jcov.jar diffcoverage result.xml diff -all
     - name: echo diff
       run: |
         cat diff
