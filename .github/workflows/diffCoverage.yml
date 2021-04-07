@@ -22,70 +22,70 @@ jobs:
       - name: output
         run: |
           echo ${{ steps.locations_parse.outputs.locations }}
-  coverage:
-    runs-on: ubuntu-latest
-    if: startsWith(github.event.comment.body, 'test') && github.event.issue.pull_request
-    env:
-      JDK_VERSION: '8'
-      JDK_IMPL: 'hotspot'
-      CUSTOMIZED_SDK_URL: 'https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u-2021-02-16-06-25/OpenJDK8U-jdk_x64_linux_hotspot_2021-02-16-06-25.tar.gz'
-      SDK_RESOURCE: 'nightly'
-    steps:
-      # get-pr step by @Simran-B https://github.com/actions/checkout/issues/331#issuecomment-707103442
-      - uses: actions/github-script@v3
-        id: get-pr
-        with:
-          script: |
-            const request = {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number
-            }
-            core.info(`Getting PR #${request.pull_number} from ${request.owner}/${request.repo}`)
-            try {
-              const result = await github.pulls.get(request)
-              return result.data
-            } catch (err) {
-              core.setFailed(`Request failed with error ${err}`)
-            }
-      - name: Extract base and head
-        id: base-head
-        run: |
-          echo ::set-output name=head_repo_url::${{ fromJSON(steps.get-pr.outputs.result).head.repo.html_url }}
-          echo ::set-output name=head_branch::${{ fromJSON(steps.get-pr.outputs.result).head.ref }}
-      - uses: actions/checkout@v2 # we checkout the master branch because the jcov results.xml is based on the master branch.
-      - name: get diff file
-        run: |
-          git remote add upstream ${{ steps.base-head.outputs.head_repo_url }}
-          git fetch upstream
-          git diff --patch master upstream/${{ fromJSON(steps.get-pr.outputs.result).head.ref }} > diff
-      - name: download jtreg
-        run: |
-          wget https://ci.adoptopenjdk.net/job/jtreg/lastSuccessfulBuild/artifact/jtreg-4.2.0-tip.tar.gz
-          tar -zxvf jtreg-4.2.0-tip.tar.gz
-          rm -rf jtreg-4.2.0-tip.tar.gz
-      - name: download jdk
-        run: |
-          mkdir -p 'jdkbinary' && cd 'jdkbinary' && rm -rf *
-          if [ "$SDK_RESOURCE" == "customized" ]; then
-            wget ${CUSTOMIZED_SDK_URL}
-          else
-            release_type="ea"
-          if [ "$SDK_RESOURCE" == "releases" ]; then
-            release_type="ga"
-          fi
-            curl -OLJSks https://api.adoptopenjdk.net/v3/binary/latest/${JDK_VERSION}/${release_type}/linux/x64/jdk/${JDK_IMPL}/normal/adoptopenjdk  > /dev/null
-          fi
-          jdkFileName=`ls`
-          tar -zxvf ${jdkFileName} --strip-components=1 
-          rm -rf $jdkFileName
-          cd $GITHUB_WORKSPACE
-      - name: download results.xml
-        run: |
-          wget https://ci.adoptopenjdk.net/job/UploadFile/25/artifact/upload/result.xml
-      - name: run jcov
-        run: |
-          java -jar jtreg/lib/jcov.jar diffcoverage result.xml diff -all
-      - name: echo diff
-        run: |
-          cat diff
+  # coverage:
+  #   runs-on: ubuntu-latest
+  #   if: startsWith(github.event.comment.body, 'test') && github.event.issue.pull_request
+  #   env:
+  #     JDK_VERSION: '8'
+  #     JDK_IMPL: 'hotspot'
+  #     CUSTOMIZED_SDK_URL: 'https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u-2021-02-16-06-25/OpenJDK8U-jdk_x64_linux_hotspot_2021-02-16-06-25.tar.gz'
+  #     SDK_RESOURCE: 'nightly'
+  #   steps:
+  #     # get-pr step by @Simran-B https://github.com/actions/checkout/issues/331#issuecomment-707103442
+  #     - uses: actions/github-script@v3
+  #       id: get-pr
+  #       with:
+  #         script: |
+  #           const request = {
+  #             owner: context.repo.owner,
+  #             repo: context.repo.repo,
+  #             pull_number: context.issue.number
+  #           }
+  #           core.info(`Getting PR #${request.pull_number} from ${request.owner}/${request.repo}`)
+  #           try {
+  #             const result = await github.pulls.get(request)
+  #             return result.data
+  #           } catch (err) {
+  #             core.setFailed(`Request failed with error ${err}`)
+  #           }
+  #     - name: Extract base and head
+  #       id: base-head
+  #       run: |
+  #         echo ::set-output name=head_repo_url::${{ fromJSON(steps.get-pr.outputs.result).head.repo.html_url }}
+  #         echo ::set-output name=head_branch::${{ fromJSON(steps.get-pr.outputs.result).head.ref }}
+  #     - uses: actions/checkout@v2 # we checkout the master branch because the jcov results.xml is based on the master branch.
+  #     - name: get diff file
+  #       run: |
+  #         git remote add upstream ${{ steps.base-head.outputs.head_repo_url }}
+  #         git fetch upstream
+  #         git diff --patch master upstream/${{ fromJSON(steps.get-pr.outputs.result).head.ref }} > diff
+  #     - name: download jtreg
+  #       run: |
+  #         wget https://ci.adoptopenjdk.net/job/jtreg/lastSuccessfulBuild/artifact/jtreg-4.2.0-tip.tar.gz
+  #         tar -zxvf jtreg-4.2.0-tip.tar.gz
+  #         rm -rf jtreg-4.2.0-tip.tar.gz
+  #     - name: download jdk
+  #       run: |
+  #         mkdir -p 'jdkbinary' && cd 'jdkbinary' && rm -rf *
+  #         if [ "$SDK_RESOURCE" == "customized" ]; then
+  #           wget ${CUSTOMIZED_SDK_URL}
+  #         else
+  #           release_type="ea"
+  #         if [ "$SDK_RESOURCE" == "releases" ]; then
+  #           release_type="ga"
+  #         fi
+  #           curl -OLJSks https://api.adoptopenjdk.net/v3/binary/latest/${JDK_VERSION}/${release_type}/linux/x64/jdk/${JDK_IMPL}/normal/adoptopenjdk  > /dev/null
+  #         fi
+  #         jdkFileName=`ls`
+  #         tar -zxvf ${jdkFileName} --strip-components=1
+  #         rm -rf $jdkFileName
+  #         cd $GITHUB_WORKSPACE
+  #     - name: download results.xml
+  #       run: |
+  #         wget https://ci.adoptopenjdk.net/job/UploadFile/25/artifact/upload/result.xml
+  #     - name: run jcov
+  #       run: |
+  #         java -jar jtreg/lib/jcov.jar diffcoverage result.xml diff -all
+  #     - name: echo diff
+  #       run: |
+  #         cat diff
