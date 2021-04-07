@@ -6,10 +6,12 @@ import re
 def main():
     print(sys.argv)
     result = []
-    # pattern = re.compile(r"/(aaa)/([a-zA-Z0-9 ]+?)/")
+    # example: jdk/src/windows/classes/java/lang/
+    regex = "/jdk/src/([a-zA-Z0-9 ]+?)/classes/java/([a-zA-Z0-9 ]+?)/"
     # TODO: handle the change of buildenv dir
     for argument in sys.argv:
-        print(argument)
+        if len(re.findall(regex, argument)) > 0:
+            result.append(re.findall(regex, argument))
 
     if not result:
         result.append('skip')
