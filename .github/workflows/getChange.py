@@ -11,7 +11,7 @@ def main():
         r"jdk/src/([a-zA-Z0-9 ]+?)/classes/java/([a-zA-Z0-9 ]+?)/")
     # TODO: handle the change of buildenv dir
     for argument in sys.argv:
-        if len(re.match(pattern, argument)) > 0:
+        if (re.match(pattern, argument)):
             result.append(argument)
 
     if not result:
